@@ -1897,7 +1897,9 @@ pub(crate) async fn get_swap(
 
     let map_swap = |payment_hash: &PaymentHash, swap_data: &SwapData, taker: bool| {
         let mut status = swap_data.status.clone();
-        if status == SwapStatus::Waiting && get_current_timestamp() > swap_data.swap_info.expiry {
+        if (status == SwapStatus::Waiting || status == SwapStatus::Pending)
+            && get_current_timestamp() > swap_data.swap_info.expiry
+        {
             status = SwapStatus::Expired;
         } else if status == SwapStatus::Pending
             && get_current_timestamp() > swap_data.initiated_at.unwrap() + 86400
@@ -2517,7 +2519,9 @@ pub(crate) async fn list_swaps(
 
     let map_swap = |payment_hash: &PaymentHash, swap_data: &SwapData, taker: bool| {
         let mut status = swap_data.status.clone();
-        if status == SwapStatus::Waiting && get_current_timestamp() > swap_data.swap_info.expiry {
+        if (status == SwapStatus::Waiting || status == SwapStatus::Pending)
+            && get_current_timestamp() > swap_data.swap_info.expiry
+        {
             status = SwapStatus::Expired;
         } else if status == SwapStatus::Pending
             && get_current_timestamp() > swap_data.initiated_at.unwrap() + 86400
