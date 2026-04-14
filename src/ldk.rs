@@ -91,6 +91,17 @@ use tokio::runtime::Handle;
 use tokio::sync::watch::Sender;
 use tokio::task::JoinHandle;
 
+#[cfg(test)]
+pub(crate) static PAYMENT_FAILED_GATE: std::sync::OnceLock<
+    std::sync::Mutex<Option<Arc<tokio::sync::Notify>>>,
+> = std::sync::OnceLock::new();
+
+#[cfg(test)]
+pub(crate) fn payment_failed_gate(
+) -> &'static std::sync::Mutex<Option<Arc<tokio::sync::Notify>>> {
+    PAYMENT_FAILED_GATE.get_or_init(|| std::sync::Mutex::new(None))
+}
+
 use crate::bitcoind::BitcoindClient;
 use crate::disk::{
     self, FilesystemLogger, CHANNEL_IDS_FNAME, CHANNEL_PEER_DATA, INBOUND_PAYMENTS_FNAME,
@@ -892,6 +903,13 @@ async fn handle_ldk_events(
             payment_id,
             ..
         } => {
+            #[cfg(test)]
+            {
+                let maybe_notify = payment_failed_gate().lock().unwrap().clone();
+                if let Some(notify) = maybe_notify {
+                    notify.notified().await;
+                }
+            }
             if let Some(hash) = payment_hash {
                 tracing::error!(
                     "EVENT: Failed to send payment to payment ID {}, payment hash {}: {:?}",

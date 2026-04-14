@@ -2032,6 +2032,8 @@ mod swap_roundtrip_fail_btc2btc;
 mod swap_roundtrip_fail_invalid_asset_from;
 mod swap_roundtrip_fail_invalid_asset_to;
 mod swap_roundtrip_fail_same_asset;
+mod swap_expire_pending;
+mod swap_expire_waiting;
 mod swap_roundtrip_fail_timeout;
 mod swap_roundtrip_fail_whitelist;
 mod swap_roundtrip_multihop_asset_asset;
